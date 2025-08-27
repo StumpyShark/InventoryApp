@@ -1,0 +1,108 @@
+﻿<Window x:Class="InventoryApp.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:InventoryApp"
+        xmlns:converters="clr-namespace:InventoryApp.Converters"
+        Title="Инвентаризация" Height="450" Width="800">
+    <Window.Resources>
+        <converters:RoleToVisibilityConverter x:Key="RoleConverter"/>
+    </Window.Resources>
+    <Grid>
+        <TabControl>
+            <TabItem Header="Товары">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                        <Button Content="Обновить" Margin="5" 
+                                Command="{Binding LoadProductsCommand}"/>
+                        <Button Content="Добавить товар" Margin="5"
+                                Command="{Binding AddProductCommand}"
+                                Visibility="{Binding CurrentUser.Role, 
+                                    Converter={StaticResource RoleConverter}, 
+                                    ConverterParameter=Worker}"/>
+                    </StackPanel>
+
+                    <DataGrid ItemsSource="{Binding Products}" Grid.Row="1"
+                              AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="Категория" Binding="{Binding Category}"/>
+                            <DataGridTextColumn Header="Кол-во" Binding="{Binding Quantity}" Width="70"/>
+                            <DataGridTextColumn Header="Цена" Binding="{Binding Price}" Width="80"/>
+                            <DataGridTemplateColumn Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Изменить" Margin="2"
+                                                    Command="{Binding DataContext.EditProductCommand, 
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="{Binding DataContext.CurrentUser.Role, 
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}, 
+                                                        Converter={StaticResource RoleConverter}, 
+                                                        ConverterParameter=Admin}"/>
+                                            <Button Content="Удалить" Margin="2"
+                                                    Command="{Binding DataContext.DeleteRequestCommand, 
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    Visibility="{Binding DataContext.CurrentUser.Role, 
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}, 
+                                                        Converter={StaticResource RoleConverter}, 
+                                                        ConverterParameter=Worker}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Запросы" 
+                     Visibility="{Binding CurrentUser.Role, 
+                         Converter={StaticResource RoleConverter}, 
+                         ConverterParameter=Admin}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Button Content="Обновить" Margin="5" Grid.Row="0"
+                            Command="{Binding LoadRequestsCommand}"/>
+
+                    <DataGrid ItemsSource="{Binding DeleteRequests}" Grid.Row="1"
+                              AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="Товар" Binding="{Binding Product.Name}"/>
+                            <DataGridTextColumn Header="Рабочий" Binding="{Binding Worker.Username}"/>
+                            <DataGridTextColumn Header="Дата" Binding="{Binding CreatedAt, StringFormat=dd.MM.yyyy}"/>
+                            <DataGridTemplateColumn Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="Утвердить" Margin="2"
+                                                    Command="{Binding DataContext.ApproveRequestCommand, 
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Content="Отклонить" Margin="2"
+                                                    Command="{Binding DataContext.RejectRequestCommand, 
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
